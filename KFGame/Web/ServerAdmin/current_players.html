@@ -12,9 +12,10 @@
     <th><a href="<%page.fulluri%>?sortby=name&amp;reverse=<%reverse.name%>" class="sortable <%sorted.name%>">Player name</a></th>
     <th><a href="<%page.fulluri%>?sortby=ping&amp;reverse=<%reverse.ping%>" class="sortable <%sorted.ping%>">Ping</a></th>
     <th>IP</th>
-    <th title="The unique ID for this game account.">Unique Net ID</th>
+    <th>Location</th>
+    <th style="display:none" title="The unique ID for this game account.">Unique Net ID</th>
     <th>Steam ID</th>
-    <th title="The Steam community ID.">Community ID</th>
+    <th style="display:none" title="The Steam community ID.">Community ID</th>
     <th>Admin</th>
     <th title="Spectator">Spec.</th>
     <th>Controls</th>
@@ -81,6 +82,31 @@ function ajaxError(XMLHttpRequest, textStatus, errorThrown) {
         document.location = '<%page.fulluri%>';
     }
 }
+
+function callAjax(url, callback) {
+  var xmlhttp;
+  xmlhttp = new XMLHttpRequest();
+  xmlhttp.onreadystatechange = function () {
+    if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+      callback(JSON.parse(xmlhttp.responseText));
+    }
+  }
+  xmlhttp.open('GET', url, true);
+  xmlhttp.send();
+}
+
+var playersIPs = document.querySelectorAll('#players td:nth-child(4)');
+var playersSteamIDs = document.querySelectorAll('#players td:nth-child(7)');
+
+[].forEach.call(playersIPs, function (ip) {
+  callAjax('http://ipinfo.io/'+ip.innerHTML+'/json', function(ipinfo) {
+   ip.parentNode.children[4].innerHTML = " [" + ipinfo.country + "] (" + ipinfo.city + ")";
+  });
+});
+
+[].forEach.call(playersSteamIDs, function (steamid) {
+  steamid.innerHTML = '<a target="_blank" href="https://steamcommunity.com/profiles/'+ steamid.innerHTML +'">'+steamid.innerHTML+'</a>';
+});
 //]]>
 </script>
 
